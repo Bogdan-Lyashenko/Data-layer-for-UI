@@ -120,7 +120,7 @@ The key points are:
 * Postponed API call. A parent should trigger call when it's known that call is configured properly for exact case.
 * API call method (like 'getUserById') should contain 'current call parameters' state. This will make possible to change configuration at any moments of time.
 * API call method should provide interfaces to modify parameters state or add pre/post interceptors for call.
-* An abstractions level of models and services should be added
+* An abstractions layer of models and services should be added
 
 Alright, let's check the code can looks like
 ```javascript
@@ -281,4 +281,39 @@ user.global().
 });
 
 ```
-Look pretty powerful, right?  In fact, you can extend it as far as you want, because now you have endpoint to manage work with back-end. End-point which was hard to imagine with implementation when you just use fetch('/url/id') directly from view layer. Nice.
+Look pretty powerful, right?  In fact, you can extend it as far as you want, because now you have endpoint to manage work with back-end. End-point which was hard to imagine with implementation when you just use 
+```javascriptfetch
+('/url/id') 
+```
+
+directly from view layer. Nice.
+
+### More complexity?
+What if you have a lot of APIs and do not want to be affected too much by each its change? Well, if your API is pretty stable I think you should not over-complicate things, otherwise, one more good thing for you is *data-source* layer.
+Data-sources layer helps you to organize loose coupling with APIs end-points.
+Remember the implementation of user model method?
+```javascript
+//api/models/user.js
+...
+getDetails = (userId) => {	
+    const apiConfigCall = new ApiCallConfigurationObject();
+    
+    apiConfigCall.setBaseUrl(URL_CONST.USER_DETAILS);
+    apiConfigCall.addUrlParams(userId);
+    
+    return apiConfigCall;
+}  
+```
+As you can see it's tightly coupled with URL_CONST.USER_DETAILS for exact data-source (like you-api-provider-for-user.com/user). 
+But what if you can process current source dynamicaly? like
+
+```javascript
+//api/models/user.js
+...
+getDetails = (userId) => {	
+    const currentDataSource = getCurrentSource();
+    ...
+    return currentDataSource.getDetails(userId);
+}  
+```
+And getCurrentSource is a method which depends on configuration return you current data source implementation.
